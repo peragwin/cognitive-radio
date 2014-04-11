@@ -12,7 +12,7 @@ def modulateQAM(data, mode, fc, fs, symbol_length):
     if(np.max(data) >= mode):
         print("All data elements must be <= mode")
         return
-     
+
     waveout = []
     t = np.r_[0:symbol_length:1.0/fs]
     d = data
@@ -32,44 +32,59 @@ def modulateQAM(data, mode, fc, fs, symbol_length):
     return waveout
 
 def demodulateQAM(wave, mode, fc, fs, symbol_length):
-    A = matchedCos(wave, fc, fs, symbol_length)
-    B = matchedSin(wave, fc, fs, symbol_length)
+
+    num_symbols = wave.size / (fs*symbol_length)
+
+    ret = []
+
+    for s in np.linspace(0,wave.size, num_symbols):
+
+        A = matchedCos(wave[s:s+fs*symbol_length], fc, fs, symbol_length)
+        B = matchedSin(wave[s:s+fs*symbol_length], fc, fs, symbol_length)
    # print A, B
-    # hresholding:  
-  
-    if (np.abs(A) > .667):
-        Ah = np.sign(A)
-    else:
-        Ah = .333*np.sign(A)
-    
-    if (np.abs(B) > .667):
-        Bh = np.sign(B)
-    else:
-        Bh = .333*np.sign(B)
+    # thresholding:
+
+        if (np.abs(A) > .667):
+            Ah = np.sign(A)
+        else:
+            Ah = .333*np.sign(A)
+
+        if (np.abs(B) > .667):
+            Bh = np.sign(B)
+        else:
+            Bh = .333*np.sign(B)
    # print Ah, Bh
     # return the bit value
-    if (mode == 4):
-        idx = 0
-        for coef in mode4coef:
-            if (coef[0] == Ah and coef[1] == Bh):
-                return idx
-            idx+=1
-    if (mode == 16):
-        idx = 0
-        for coef in mode16coef:
-            if (coef[0] == Ah and coef[1] == Bh):
-                return idx
-            idx+=1
+        if (mode == 4):
+            idx = 0
+            for coef in mode4coef:
+                if (coef[0] == Ah and coef[1] == Bh):
+                    ret = np.append(ret,idx)
+                idx+=1
+        if (mode == 16):
+            idx = 0
+            for coef in mode16coef:
+                if (coef[0] == Ah and coef[1] == Bh):
+                    ret = np.append(ret, idx)
+                idx+=1
+
+    return ret
 
 def matchedCos(wave, fc, fs, symbol_length):
     t = np.r_[0:symbol_length:1.0/fs]
     matchedfilt = np.cos(2*np.pi*fc*t)
-    return np.inner(wave, matchedfilt)/(t.size)*2
+    if (wave.size == t.size):
+        return np.inner(wave, matchedfilt)/(t.size)*2
+    else:
+        return 0
 
 def matchedSin(wave, fc, fs, symbol_length):
     t = np.r_[0:symbol_length:1.0/fs]
     matchedfilt = np.sin(2*np.pi*fc*t)
-    return np.inner(wave, matchedfilt)/(t.size)*2
+    if (wave.size == t.size):
+        return np.inner(wave, matchedfilt)/(t.size)*2
+    else:
+        return 0
 
 
 def testQAM():
@@ -80,6 +95,7 @@ def testQAM():
     demod = demodulateQAM(modulated, 16, 440.0, 48000.0, 0.1)
 
     print(demod == data)
+
 
 if __name__ == '__main__':
     testQAM()
