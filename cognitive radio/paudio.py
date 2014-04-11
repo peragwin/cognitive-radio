@@ -72,10 +72,12 @@ def audioDevNumbers(p):
     # speaker and the USB audio interface
     # some devices will have the name Generic USB Audio Device. In that case, replace it with the the right name.
     
-    dusb = 'None'
+    dusbin = 'None'
+    dusbout = 'None'
     din = 'None'
     dout = 'None'
    
+
     N = p.get_device_count()
     for n in range(0,N):
             name = p.get_device_info_by_index(n).get('name')
@@ -132,3 +134,11 @@ def bufferedAudio(p,process, dev_in=None, dev_out=None):
     p.terminate()
 
 
+if (__name__ == '__main__'):  
+
+    p = pyaudio.PyAudio()
+
+    def process(samples):
+        return samples
+
+    bufferedAudio(p,process)
