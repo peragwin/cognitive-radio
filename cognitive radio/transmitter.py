@@ -9,17 +9,18 @@ import multiprocessing
 from paudio import *
 
 from QAM import *
+from FSK import *
+
+data = np.random.randint(0,16,size = 200)
 
 
-data = np.random.randint(0,16,size = 20)
 
+#signal = []
 
-
-signal = []
-
-for d in data:
-    signal = np.append(signal,modulateQAM(d,16,2000,44100,0.1))
-
+#for d in data:
+#    signal = np.append(signal,modulateQAM(d,16,2000,44100,0.1))
+    
+signal = modulateFSK(data, 440, 4400, 16, 44100, .01)
 
 def process(samples):
     return samples
@@ -44,7 +45,7 @@ t_play.start()
 # record and play about 10 seconds of audio 430*1024/44100 = 9.98 s
 Qout.put(signal)
 output = []
-for i in range(420/4):
+for i in range(420):
     samples = Qin.get()
     output = np.append(output, samples)
 
@@ -57,4 +58,4 @@ rec_data = demodulateQAM(output, 16,2000.0,44100.0, 0.1)
 
 print np.equal(rec_data[:data.size],data)
 
-
+#p.terminate()

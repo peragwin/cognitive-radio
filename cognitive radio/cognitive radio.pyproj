@@ -24,6 +24,7 @@
   <ItemGroup>
     <Compile Include="cognitive_radio.py" />
     <Compile Include="membrane.py" />
+    <Compile Include="FSK.py" />
     <Compile Include="paudio.py" />
     <Compile Include="transmitter.py" />
     <Compile Include="QAM.py" />
