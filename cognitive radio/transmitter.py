@@ -10,21 +10,22 @@ from paudio import *
 
 from QAM import *
 from FSK import *
+from syncronization import *
 
-data = np.random.randint(0,16,size = 200)
-
-
+data = np.random.randint(0,16,size = 20)
 
 #signal = []
 
 #for d in data:
 #    signal = np.append(signal,modulateQAM(d,16,2000,44100,0.1))
     
-signal = modulateFSK(data, 440, 4400, 16, 44100, .01)
+signal = modulateFSK(data, 440.0, 4200.0, 16, 44100.0, .1)
+
+signal = np.append(genSyncPulse(),signal)
+signal = np.append(signal, genSyncPulse())
 
 def process(samples):
     return samples
-
 
 
 # create an input output FIFO queues
@@ -44,18 +45,23 @@ t_play.start()
 
 # record and play about 10 seconds of audio 430*1024/44100 = 9.98 s
 Qout.put(signal)
-output = []
-for i in range(420):
+input = []
+
+for i in range(420/2):
     samples = Qin.get()
-    output = np.append(output, samples)
+    input = np.append(input, samples)
 
-print len(output)
-
-Qout.put(output)
+Qout.put(input)
 
 
-rec_data = demodulateQAM(output, 16,2000.0,44100.0, 0.1)
+cropped = findSignal(input)
+
+rec_data = demodulateFSK(cropped, 440.0, 4200.0, 16, 44100.0, 0.1)
+
+for i in range(data.size):
+    print data[i], rec_data[i]
 
 print np.equal(rec_data[:data.size],data)
 
+print rec_data
 #p.terminate()
