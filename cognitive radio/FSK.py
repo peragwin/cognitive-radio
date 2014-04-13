@@ -27,7 +27,7 @@ def demodulateFSK(signal, f0, f1, n, fs, symbol_length):
     t = np.r_[0:symbol_length:1.0/fs]
     ssize = symbol_length*(signal.size //  symbol_length)
     num_symbols = signal.size // t.size
-    print num_symbols
+    
     out = np.zeros(num_symbols)
 
     for i,s in enumerate(np.r_[0:ssize-symbol_length*fs:symbol_length*fs]):

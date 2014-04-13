@@ -1,6 +1,7 @@
-import numpy as np
-import scipy.signal as signal
+from __future__ import division
 
+import numpy as np
+import scipy.signal as sp
 import Queue
 import threading
 import pyaudio
@@ -12,7 +13,7 @@ from QAM import *
 from FSK import *
 from syncronization import *
 
-data = np.random.randint(0,16,size = 20)
+data = np.random.randint(0,16,size = 200)
 
 #signal = []
 
@@ -24,44 +25,48 @@ signal = modulateFSK(data, 440.0, 4200.0, 16, 44100.0, .1)
 signal = np.append(genSyncPulse(),signal)
 signal = np.append(signal, genSyncPulse())
 
-def process(samples):
-    return samples
+signal = np.append(np.zeros(100), signal)
+signal = np.append(signal, np.zeros(100))
 
+## create an input output FIFO queues
+#Qout = Queue.Queue()
+#Qin = Queue.Queue()
 
-# create an input output FIFO queues
-Qout = Queue.Queue()
-Qin = Queue.Queue()
+## create a pyaudio object
+#p = pyaudio.PyAudio()
 
-# create a pyaudio object
-p = pyaudio.PyAudio()
+## initialize a playing thread.
+#t_play = threading.Thread(target = play_audio,   args = (Qout,   p, 44100  ))
 
-# initialize a playing thread.
-t_play = threading.Thread(target = play_audio,   args = (Qout,   p, 44100  ))
-
-t_rec = threading.Thread(target= record_audio, args = (Qin, p, 44100) )
-# start the recording and playing threads#
-t_rec.start()
-t_play.start()
+#t_rec = threading.Thread(target= record_audio, args = (Qin, p, 44100) )
+## start the recording and playing threads#
+#t_rec.start()
+#t_play.start()
 
 # record and play about 10 seconds of audio 430*1024/44100 = 9.98 s
-Qout.put(signal)
-input = []
+#Qout.put(signal)
 
-for i in range(420/2):
-    samples = Qin.get()
-    input = np.append(input, samples)
+#input = []
 
-Qout.put(input)
+#for i in range(420/2):
+#    samples = Qin.get()
+#    input = np.append(input, samples)
 
+#Qout.put(input)
+signal += np.random.normal(size=signal.size)
 
-cropped = findSignal(input)
+cropped = findSignal(signal)
 
 rec_data = demodulateFSK(cropped, 440.0, 4200.0, 16, 44100.0, 0.1)
 
 for i in range(data.size):
-    print data[i], rec_data[i]
+    if (data[i] != rec_data[i]):
+        print i, data[i], rec_data[i]
 
-print np.equal(rec_data[:data.size],data)
+disp = np.equal(rec_data[:data.size],data)
 
-print rec_data
+#print disp
+print sum(disp)/disp.size
+#print rec_data
+
 #p.terminate()

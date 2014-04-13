@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1018d9f2-c084-4aa9-b513-e16f5690c581</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>syncronization.py</StartupFile>
+    <StartupFile>transmitter.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
