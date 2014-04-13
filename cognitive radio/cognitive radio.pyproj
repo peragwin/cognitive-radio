@@ -29,6 +29,7 @@
     <Compile Include="membrane.py" />
     <Compile Include="FSK.py" />
     <Compile Include="paudio.py" />
+    <Compile Include="receiver.py" />
     <Compile Include="syncronization.py" />
     <Compile Include="test_audio.py" />
     <Compile Include="QAM.py" />

@@ -22,7 +22,7 @@ data = np.random.randint(0,32,size = 40)
 #for d in data:
 #    signal = np.append(signal,modulateQAM(d,16,2000,44100,0.1))
 
-signal = modulateFSK(data, 440.0, 4200.0, 64, 44100.0, .02)
+signal = modulateFSK(data, 440.0, 4200.0, 64, 44100.0, .04)
 
 signal = np.append(genSyncPulse(),signal)
 signal = np.append(signal, genSyncPulse())
@@ -42,7 +42,7 @@ signal = signal[::5]
 
 cropped = findSignal(signal,sync_pulse=genSyncPulse(fs=44100/5))
 
-rec_data = demodulateFSK(cropped, 440.0, 4200.0, 64, 44100.0/5, 0.02)
+rec_data = demodulateFSK(cropped, 440.0, 4200.0, 64, 44100.0/5, 0.04)
 
 
 endTime = time.time()
@@ -54,10 +54,11 @@ for i in range(min(data.size,rec_data.size)):
         print i, data[i], rec_data[i]
 try:
     disp = np.equal(rec_data[:data.size],data)
+    print sum(disp)/disp.size
 except:
     print "lost some symbols!"
 
 #print disp
-print sum(disp)/disp.size
+
 #print rec_data
 
