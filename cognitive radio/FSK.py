@@ -38,29 +38,14 @@ def demodulateFSK(signal, f0, f1, n, fs, symbol_length):
 
 def matchedFilter(f_list, sig, fs):
 
-    f_min = f_list[0]
-    f_max = f_list[f_list.size-1]
-    scl = f_list.size/(f_list.size-1)
-    
-    h = sp.firwin(24, 8800, nyq=fs)
-    sig = sp.fftconvolve(sig,h)
-    sig = sig[::5]
-
-    # could have done that - makes sense to do but realistically its probably faster to use only one fft
-
     dft = np.abs(np.fft.fft(sig))
-
-    #fft_levels = np.histogram(dft[:dft.size/2],bins = f_list.size)
-
 
    # fig = plt.figure()
    # ax = fig.add_subplot(111)
    # ax.plot(range(dft.size),dft)
    # fig.show()
 
-   # Note: the 48/44 is because 4800 is half the de
-
-    max_idx = np.argmax(dft[:dft.size/2]) / (dft.size/2) * fs/10
+    max_idx = np.argmax(dft[:dft.size/2]) / (dft.size/2) * fs/2
 
     matching = np.abs(f_list - max_idx)
 

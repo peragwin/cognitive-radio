@@ -1,3 +1,5 @@
+from __future__ import division
+
 import pyaudio
 import Queue
 import threading
@@ -96,14 +98,14 @@ def audioDevNumbers(p):
     return din, dout, dusbin, dusbout
 
 
-def bufferedAudio(p,process, dev_in=None, dev_out=None):
+def streamAudioDev(p,process, dev_in=None, dev_out=None):
     # create an input output FIFO queues
     Qin = Queue.Queue()
     Qout = Queue.Queue()
 
 
     # create a pyaudio object
-
+    p = pyaudio.PyAudio()
 
     # find the device numbers for builtin I/O and the USB
    
@@ -134,6 +136,38 @@ def bufferedAudio(p,process, dev_in=None, dev_out=None):
     p.terminate()
 
 
+def streamAndRecord(stream, time, dev_in = None, dev_out = None):
+
+        ## create an input output FIFO queues
+    Qout = Queue.Queue()
+    Qin = Queue.Queue()
+
+    ## create a pyaudio object
+    p = pyaudio.PyAudio()
+
+    ## initialize a playing thread.
+    t_play = threading.Thread(target = play_audio,   args = (Qout,   p, 44100,dev_in  ))
+
+    t_rec = threading.Thread(target= record_audio, args = (Qin, p, 44100, dev_out) )
+    ## start the recording and playing threads#
+    t_rec.start()
+    t_play.start()
+
+    # record and play about 10 seconds of audio 430*1024/44100 = 9.98 s
+    Qout.put(stream)
+
+    signal = []
+
+    num_iter = int( time / (1024/44100) )
+
+    for i in range(num_iter):
+        samples = Qin.get()
+        signal = np.append(signal, samples)
+
+    p.terminate()
+
+    return signal
+
 if (__name__ == '__main__'):  
 
     p = pyaudio.PyAudio()
@@ -141,4 +175,4 @@ if (__name__ == '__main__'):
     def process(samples):
         return samples
 
-    bufferedAudio(p,process)
+    streamAudioDev(p,process)
