@@ -70,6 +70,18 @@ def findPeaks(data,threshold, width=1):
 
     return peaks
 
+def findSync(signal, thresh = .9, sync_pulse = SYNC_PULSE):
+
+    amplitude = np.max(np.abs(signal))
+
+    corr = np.abs( sp.fftconvolve(signal, sync_pulse[::-1], mode='full') )
+    
+    peaks = findPeaks(corr)
+    if peaks:
+        return peaks[0]
+    else:
+        return -1
+
 if __name__ == '__main__' :
 
     cos = np.cos(2*np.pi*10*np.r_[0:1:.001])

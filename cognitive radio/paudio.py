@@ -168,6 +168,24 @@ def streamAndRecord(stream, time, dev_in = None, dev_out = None):
 
     return signal
 
+def bufferedRecord(processor, time, dev_in = None):
+
+    Qin = Queue.Queue()
+    Qout = Queue.Queue()
+
+    p = pyaudio.PyAudio()
+
+    t_rec = threading.Thread(target = record_audio,   args = (Qin,   p, 44100, dev_in  ))
+    t_rec.start()
+
+    for n in range(0,int(time/(1024/44100))):
+    
+        samples = Qin.get()
+        processor.process(samples)
+
+    p.terminate()
+
+
 if (__name__ == '__main__'):  
 
     p = pyaudio.PyAudio()
