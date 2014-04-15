@@ -36,7 +36,7 @@ def demodulateFSK(signal, f0, f1, n, fs, symbol_length):
         
     return out
 
-def demodulateFSK(signal, f_list, fs, symbol_length):
+def demodulateFSK_list(signal, f_list, fs, symbol_length):
     
     #f_list = np.linspace(f0, f1, n)
 

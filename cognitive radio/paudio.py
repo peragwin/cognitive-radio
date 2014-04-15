@@ -136,7 +136,7 @@ def streamAudioDev(p,process, dev_in=None, dev_out=None):
     p.terminate()
 
 
-def streamAndRecord(stream, time, dev_in = None, dev_out = None):
+def streamAndRecord(stream, time, fs, dev_in = None, dev_out = None):
 
         ## create an input output FIFO queues
     Qout = Queue.Queue()
@@ -146,9 +146,9 @@ def streamAndRecord(stream, time, dev_in = None, dev_out = None):
     p = pyaudio.PyAudio()
 
     ## initialize a playing thread.
-    t_play = threading.Thread(target = play_audio,   args = (Qout,   p, 44100,dev_in  ))
+    t_play = threading.Thread(target = play_audio,   args = (Qout,   p, fs,dev_in  ))
 
-    t_rec = threading.Thread(target= record_audio, args = (Qin, p, 44100, dev_out) )
+    t_rec = threading.Thread(target= record_audio, args = (Qin, p, fs, dev_out) )
     ## start the recording and playing threads#
     t_rec.start()
     t_play.start()
@@ -158,7 +158,7 @@ def streamAndRecord(stream, time, dev_in = None, dev_out = None):
 
     signal = []
 
-    num_iter = int( time / (1024/44100) )
+    num_iter = int( time / (1024/fs) )
 
     for i in range(num_iter):
         samples = Qin.get()
