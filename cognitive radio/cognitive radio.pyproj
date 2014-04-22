@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Include="cognitive_radio.py" />
     <Compile Include="equalization.py" />
+    <Compile Include="helpers.py" />
     <Compile Include="membrane.py" />
     <Compile Include="FSK.py" />
     <Compile Include="paudio.py" />

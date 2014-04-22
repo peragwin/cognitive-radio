@@ -15,11 +15,13 @@ from QAM import *
 from FSK import *
 from syncronization import *
 
-data = np.random.randint(0,32,size = 40)
+data = np.random.randint(0,2,size = 100)
 
 fs = 48000.0
+f_list = np.linspace(800, 1200, 2)
+sym_len = 800/48000 # 120 bps
 
-signal = modulateFSK(data, 440.0, 4200.0, 32, fs, .04)
+signal = modulateFSK(data, f_list, fs, sym_len)
 
 signal = np.append(genSyncPulse(),signal)
 signal = np.append(signal, genSyncPulse())
@@ -32,19 +34,19 @@ signalin = streamAndRecord(signal, 6, fs)
 
 startTime = time.time()
 
-h = sp.firwin(24,4400, nyq = fs/2)
+h = sp.firwin(24,4800, nyq = fs/2)
 signal = sp.fftconvolve(signalin, h)
 signal = signal[::5]
 
 
 cropped = findSignal(signal,sync_pulse=genSyncPulse(fs=fs/5))
 
-rec_data = demodulateFSK(cropped, 440.0, 4200.0, 32, fs/5, 0.04)
+rec_data = demodulateFSK(cropped, f_list, fs/5, sym_len)
 
 
 endTime = time.time()
-
-print endTime - startTime
+# time it takes for the receiver part
+print endTime - startTime 
 
 for i in range(min(data.size,rec_data.size)):
     if (data[i] != rec_data[i]):
