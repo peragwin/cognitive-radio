@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1018d9f2-c084-4aa9-b513-e16f5690c581</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>OFDM.py</StartupFile>
+    <StartupFile>receiver.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -35,6 +35,7 @@
     <Compile Include="syncronization.py" />
     <Compile Include="test_audio.py" />
     <Compile Include="QAM.py" />
+    <Compile Include="transmitter.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="{2af0f10d-7135-4994-9156-5d01c9c11b7e}\2.7" />

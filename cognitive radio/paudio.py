@@ -168,12 +168,13 @@ def streamAndRecord(stream, time, fs, dev_in = None, dev_out = None):
 
     return signal
 
-def bufferedRecord(processor, time, dev_in = None):
+def bufferedRecord(processor, time, p = None, dev_in = None):
 
     Qin = Queue.Queue()
     Qout = Queue.Queue()
 
-    p = pyaudio.PyAudio()
+    if not p:
+        p = pyaudio.PyAudio()
 
     t_rec = threading.Thread(target = record_audio,   args = (Qin,   p, 44100, dev_in  ))
     t_rec.start()
@@ -184,6 +185,13 @@ def bufferedRecord(processor, time, dev_in = None):
         processor.process(samples)
 
     p.terminate()
+
+
+#def threadedProcess(processor, time, p=None, dev_in = None):
+
+
+ 
+
 
 
 if (__name__ == '__main__'):  
