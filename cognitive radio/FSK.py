@@ -32,9 +32,10 @@ def demodulateFSK(signal, f_list, fs, symbol_length):
     fc = np.mean(f_list)
     
     f_cut = ( f_list[f_list.size-1] - f_list[0] )
-    h = sp.firwin(80, f_cut, nyq=fs)
+    h = sp.firwin(80, f_cut/2, nyq=fs/2)
     t = np.r_[0.0:80]/fs
     h = np.exp(2j*np.pi*fc*t) * h
+    #h = h * np.cos(2*np.pi*fc*t)
 
     stream = sp.fftconvolve(signal,h, mode='same')
   #  print stream.size
@@ -49,7 +50,7 @@ def demodulateFSK(signal, f_list, fs, symbol_length):
    
 
     #out = sp.medfilt(out, 39)
-    myplot(out)
+   #myplot(out)
 
     out = np.sign(out[20::symbol_length*fs])
 

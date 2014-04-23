@@ -15,6 +15,8 @@ from QAM import *
 from FSK import *
 from syncronization import *
 
+from OFDM import *
+
 data = np.random.randint(0,2,size = 100)
 
 fs = 48000.0

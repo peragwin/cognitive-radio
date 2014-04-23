@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1018d9f2-c084-4aa9-b513-e16f5690c581</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>test_audio.py</StartupFile>
+    <StartupFile>OFDM.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -29,6 +29,7 @@
     <Compile Include="helpers.py" />
     <Compile Include="membrane.py" />
     <Compile Include="FSK.py" />
+    <Compile Include="OFDM.py" />
     <Compile Include="paudio.py" />
     <Compile Include="receiver.py" />
     <Compile Include="syncronization.py" />
