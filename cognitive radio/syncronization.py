@@ -83,17 +83,24 @@ def findPeaks(data,threshold, width=1):
 
     return peaks
 
-def findSync(signal, thresh = .9, sync_pulse = SYNC_PULSE):
+def findSync(signal, thresh = .95, sync_pulse = SYNC_PULSE):
 
-    amplitude = np.max(np.abs(signal))
+    mean = np.mean(np.abs(signal))
+    sync_en = np.sum(np.abs(sync_pulse))
 
     corr = np.abs( sp.fftconvolve(signal, sync_pulse[::-1], mode='full') )
-    
-    peaks = findPeaks(corr, thresh)
-    if peaks != None:
-        if peaks.size == 1:
-            #myplot(corr)
-            return peaks[0]
+    corrmax = np.max(corr)
+   
+    if corrmax > sync_en * mean / 2.5:   # threshold for detection
+        return np.argmax(corr)
+
+#        #myplot(corr)
+#        peaks = findPeaks(corr, thresh)
+#        if peaks != []:
+#        #myplot(corr)
+#         #   print amplitude, mean, corrmax, sync_en
+#        #if peaks.size == 1:
+#            return peaks[0]
     
     return -1
 
