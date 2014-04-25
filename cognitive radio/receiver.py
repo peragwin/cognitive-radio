@@ -14,9 +14,10 @@ from transmitter import *
 class Decoder:
 
     dataBuffer = []
-    bufferSize = 0
+    decode_count = 0
     inSync = 0
     start_idx = 0
+    finished = 0
 
     rec_data = []
 
@@ -30,23 +31,18 @@ class Decoder:
         self.sync_pulse = sync_pulse
         self.sync_width = sync_width
 
-    def process(self, data):
-        self.dataBuffer = np.append(self.dataBuffer, data)
-        self.bufferSize += len(data)
+    def process(self, data = None):
+        if data != None:
+            self.dataBuffer = np.append(self.dataBuffer, data)
+            #self.bufferSize += len(data)
 
-        inSync = self.checkForSync()
-        print inSync, self.bufferSize
+        print self.inSync, self.dataBuffer.size, (self.dataBuffer.size - self.start_idx) // self.symbol_size
 
         if self.inSync:
             
-            num_symbols = (self.bufferSize - self.start_idx) // self.symbol_size
-
-            if num_symbols > 100:
-                print self.start_idx, self.dataBuffer.size
-                self.inSync = self.checkForSync()
-                self.dataBuffer = self.dataBuffer[self.start_idx:]
-                self.start_idx = 0
-                return
+            num_symbols = (self.dataBuffer.size - self.start_idx) // self.symbol_size
+            print num_symbols
+            
 
             if num_symbols > 0:
                 data = self.dataBuffer[self.start_idx:self.start_idx+num_symbols*self.symbol_size]
@@ -56,57 +52,97 @@ class Decoder:
                     num_demod = demod.size
                     if num_demod == num_symbols:
                          self.rec_data = np.append(self.rec_data, demod)
-                         self.start_idx += self.symbol_size
+                         self.start_idx += self.symbol_size*num_symbols
+                         self.decode_count += num_symbols
                     else:
                         print 'error demodulating, wrong size:', num_demod, num_symbols
-                #else:
-                #    if (bufferSize - start_idx) > 2 * self.sync_pulse.size:
-                #        self.inSync = self.checkForSync()
-                #    print 'error demodulating, nothing found'
-                #    return
+                else:
+                    #if (bufferSize - start_idx) > 2 * self.sync_pulse.size:
+                    #    self.inSync = self.checkForSync()
+                    print 'error demodulating, nothing found'
+                    return 1
+            else:
+                print "neg symbols? >>> Must be done."
+                return 0
+
+            if self.decode_count >= (self.sync_width):
+                # done with this section
+                #print self.start_idx, self.dataBuffer.size
+                self.decode_count = 0
+                self.inSync = self.checkForSync()
+                print 'end of chuck, inSync?', self.inSync
+                ####self.dataBuffer = self.dataBuffer[self.start_idx:]
+                
+                ####self.start_idx = 0
+                return 1
+                
         else:
-            pass             
+            self.inSync = self.checkForSync()            
         
+        return 0
 
     def checkForSync(self):
-        if self.bufferSize > self.sync_width * self.symbol_size :
+        if self.decode_count == 0: # and self.dataBuffer.size >= self.sync_pulse.size: #self.dataBuffer.size > self.sync_width/50 * self.symbol_size :
             start_idx = findSync(self.dataBuffer,sync_pulse = self.sync_pulse)
+            
             if start_idx >= 0:
                 self.inSync = True
                 self.dataBuffer = self.dataBuffer[start_idx:]
-                self.bufferSize = self.dataBuffer.size // self.symbol_size
+                #self.bufferSize = self.dataBuffer.size // self.symbol_size
                 self.start_idx = 0
                 return True
+
         return False
 
     def demodulate(self,data):
         return demodulateFSK(data, self.f_list, self.fs, self.symbol_length)
 
+    def complete(self):
+        return self.finished and self.bufferSize == 0
 
 
-def realtimeDecoder(f0, f1, n, symbol_length,pa = None, sync_pulse = None):
+
+def realtimeDecoder(f0, f1, n, symbol_length,pa = None, sync_pulse = None, QI = None):
     
     if sync_pulse == None:
         sync_pulse = genSyncPulse()
 
     decoder = Decoder(f0, f1, n, symbol_length, sync_pulse)
 
-    bufferedRecord(decoder, 20, pa)
+    if QI == None:
+        bufferedRecord(decoder, 20, pa)
+    else:
+        while(not QI.empty()):
+            data = QI.get()
+            #if data == None:
+            #    break
+            decoder.process(data)
+        while(decoder.process()):
+            print 'finsihing up'
+
 
     rec_data = decoder.rec_data
 
-    print rec_data
+    return rec_data
 
 
 if __name__ == '__main__':
 
-    sync_pulse = genSyncPulse2()
+    sync_pulse = genSyncPulse2(4000, 1200)
 
-    data = np.random.randint(0,2,1200)
+    data = np.random.randint(0,2,1000)
 
     p = pyaudio.PyAudio()
     
-    transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse)
-    realtimeDecoder(1200, 2400, 2, .01, pa=p, sync_pulse = sync_pulse)
+    Q = Queue.Queue()
+
+    transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse, QO = Q)
+ 
+    decoded = realtimeDecoder(1200, 2400, 2, .01, pa=p, sync_pulse = sync_pulse, QI = Q)
     
-    
+    print data[:20]
+    print decoded[:20]
+
+    print np.sum(np.equal(data, decoded))/data.size
+
+    p.terminate()

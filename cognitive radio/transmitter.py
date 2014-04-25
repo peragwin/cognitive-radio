@@ -10,7 +10,7 @@ from helpers import *
 from paudio import *
 
 
-def transmit(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pulse = None,pa = None, dev_out = None):
+def transmit(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pulse = None,pa = None, dev_out = None, QO = None):
 
     data_size = data.size
     symbol_size = fs*symbol_length
@@ -33,13 +33,18 @@ def transmit(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pu
     # the terminating sync pulse
     signal[i*symbol_size + j*sync_size : i*symbol_size + (j+1)*sync_size] = sync_pulse
 
-    Qout = Queue.Queue()
 
-    if not pa:
-        pa = pyaudio.PyAudio()
+    if QO == None:
+        Qout = Queue.Queue()
+
+        if not pa:
+            pa = pyaudio.PyAudio()
    
-    t_play = threading.Thread(target = play_audio, args = (Qout, pa, fs, dev_out))
-    t_play.start()
+        t_play = threading.Thread(target = play_audio, args = (Qout, pa, fs, dev_out))
+        t_play.start()
 
-    Qout.put(np.append(np.zeros(fs),signal))
+        Qout.put(np.append(np.zeros(fs),signal))
 
+    else:
+        for i in np.r_[:signal.size:1024]:
+            QO.put(signal[i:i+1024])

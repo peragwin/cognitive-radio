@@ -88,12 +88,14 @@ def findSync(signal, thresh = .9, sync_pulse = SYNC_PULSE):
     amplitude = np.max(np.abs(signal))
 
     corr = np.abs( sp.fftconvolve(signal, sync_pulse[::-1], mode='full') )
-    #myplot(corr)
+    
     peaks = findPeaks(corr, thresh)
     if peaks != None:
-        return peaks[0]
-    else:
-        return -1
+        if peaks.size == 1:
+            #myplot(corr)
+            return peaks[0]
+    
+    return -1
 
 if __name__ == '__main__' :
 
