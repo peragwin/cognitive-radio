@@ -43,7 +43,7 @@ class Decoder:
         # Structure:
         # State 0: Listening to incoming stream, looking for a nice start-of-transmission marker
         # State 1: Found the start, so begin decoding bits until sync_width have been decoded
-        # State 2: Listening for either a sync_pulse to verify synchronization before coninuing, 
+        # State 2: Listening for either a sync_pulse to verify synchronization before coninuing,
         #          or for a end-of-transmission pulse to tell us we are done receiving data.
         # State 3: done! exit.
 
@@ -59,9 +59,9 @@ class Decoder:
             print 'made it to 1'
 
             num_symbols = (self.dataBuffer.size - self.start_idx) // self.symbol_size
-            
+
             if num_symbols > 0:
-      
+
                 data = self.dataBuffer[self.start_idx:self.start_idx+num_symbols*self.symbol_size]
                 #myplot(data)
                 demod = self.demodulate(data)
@@ -69,13 +69,13 @@ class Decoder:
                 if demod != None:
                     num_demod = demod.size
                     if num_demod == num_symbols:
-                         self.rec_data = np.append(self.rec_data, demod)
-                         self.start_idx += self.symbol_size*num_symbols
-                         self.decode_count += num_symbols
-                         # check if we are done with the chunk
-                         if self.decode_count >= 100:
-                             self.process_state = 2
-                             self.decode_count = 0
+                        self.rec_data = np.append(self.rec_data, demod)
+                        self.start_idx += self.symbol_size*num_symbols
+                        self.decode_count += num_symbols
+                        # check if we are done with the chunk
+                        if self.decode_count >= 100:
+                            self.process_state = 2
+                            self.decode_count = 0
                     else:
                         print 'error demodulating, wrong size:', num_demod, num_symbols
                 else:
@@ -87,7 +87,7 @@ class Decoder:
                 return 0
 
         # State 2
-        elif self.process_state == 2: 
+        elif self.process_state == 2:
             print 'made it to 2'
             toContinue = self.checkForSync()
 
@@ -95,22 +95,22 @@ class Decoder:
             # State 3
             print 'made it to 3, yay!'
             return 0
-            
+
         return 1
 
     # Note that for checkForSync to work properly, the sync pulses MUST be equal or smaller than processing chunk sizes
     def checkForSync(self):
         if self.process_state == 0: # look for the start pulse
-            
+
             toStart = findSync(self.dataBuffer, self.ss_pulse)
             if toStart != -1:
                 self.process_state = 1
                 self.dataBuffer = self.dataBuffer[toStart:]
                 self.start_idx = 0
                 return True
-        
+
         elif self.process_state == 2: # now we are done decoding a chunk so look for a sync or end pulse
-            
+
             toEnd = findSync(self.dataBuffer, sync_pulse = self.ss_pulse)  # check for the end pulse
             if toEnd != -1:
                 self.process_state = 3
@@ -135,7 +135,7 @@ class Decoder:
 
 
 def realtimeDecoder(f0, f1, n, symbol_length,pa = None,ss_pulse=None, sync_pulse = None, QI = None):
-    
+
     if sync_pulse == None:
         sync_pulse = genSyncPulse()
 
@@ -170,13 +170,13 @@ if __name__ == '__main__':
     #    data[i:i+4] = 1
 
     p = pyaudio.PyAudio()
-    
+
     Q = Queue.Queue()
 
     transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse, ss_pulse = start_stop_pulse) #, QO = Q)
- 
+
     decoded = realtimeDecoder(1200, 2400, 2, .01, pa=p, ss_pulse=start_stop_pulse, sync_pulse = sync_pulse) #, QI = Q)
-    
+
     print data[:20]
     print decoded[:20]
 
