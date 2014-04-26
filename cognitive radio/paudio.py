@@ -171,8 +171,7 @@ def streamAndRecord(stream, time, fs, dev_in = None, dev_out = None):
 def bufferedRecord(processor, time, p = None, dev_in = None):
 
     Qin = Queue.Queue()
-    Qout = Queue.Queue()
-
+    
     if not p:
         p = pyaudio.PyAudio()
 
@@ -182,7 +181,8 @@ def bufferedRecord(processor, time, p = None, dev_in = None):
     for n in range(0,int(time/(1024/44100))):
     
         samples = Qin.get()
-        processor.process(samples)
+        if processor.process(samples):
+            break
 
     p.terminate()
 

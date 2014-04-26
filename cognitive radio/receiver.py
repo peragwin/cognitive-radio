@@ -51,8 +51,7 @@ class Decoder:
         if self.process_state == 0:
             print 'made it to 0'
             toStart = self.checkForSync()
-            #if toStart:
-            #    self.process_state = 1
+
 
         # State 1
         elif self.process_state == 1:
@@ -86,17 +85,19 @@ class Decoder:
                 self.process_state = 2
                 return 0
 
+
         # State 2
         elif self.process_state == 2:
             print 'made it to 2'
             toContinue = self.checkForSync()
 
-        else:
-            # State 3
-            print 'made it to 3, yay!'
-            return 0
 
-        return 1
+        # State 3
+        else: 
+            print 'made it to 3, yay!'
+            return 1
+
+        return 0
 
     # Note that for checkForSync to work properly, the sync pulses MUST be equal or smaller than processing chunk sizes
     def checkForSync(self):
@@ -134,7 +135,7 @@ class Decoder:
 
 
 
-def realtimeDecoder(f0, f1, n, symbol_length,pa = None,ss_pulse=None, sync_pulse = None, QI = None):
+def realtimeDecoder(f0, f1, n, symbol_length, time, pa = None,ss_pulse=None, sync_pulse = None, QI = None):
 
     if sync_pulse == None:
         sync_pulse = genSyncPulse()
@@ -142,13 +143,14 @@ def realtimeDecoder(f0, f1, n, symbol_length,pa = None,ss_pulse=None, sync_pulse
     decoder = Decoder(f0, f1, n, symbol_length, sync_pulse, ss_pulse)
 
     if QI == None:
-        bufferedRecord(decoder, 20, pa)
+        bufferedRecord(decoder, time, pa)
     else:
         while(not QI.empty()):
             data = QI.get()
-            #if data == None:
-            #    break
-            decoder.process(data)
+            
+            if decoder.process(data):
+                break
+
       #  while(decoder.process()):
       #      print 'finsihing up'
 
@@ -173,9 +175,9 @@ if __name__ == '__main__':
 
     Q = Queue.Queue()
 
-    transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse, ss_pulse = start_stop_pulse) #, QO = Q)
+    transmit(data, 1200, 2400, 2, .008, pa = p,sync_pulse = sync_pulse, ss_pulse = start_stop_pulse) #, QO = Q)
 
-    decoded = realtimeDecoder(1200, 2400, 2, .01, pa=p, ss_pulse=start_stop_pulse, sync_pulse = sync_pulse) #, QI = Q)
+    decoded = realtimeDecoder(1200, 2400, 2, .008, 10, pa=p, ss_pulse=start_stop_pulse, sync_pulse = sync_pulse) #, QI = Q)
 
     print data[:20]
     print decoded[:20]
