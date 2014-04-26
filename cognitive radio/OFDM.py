@@ -44,20 +44,26 @@ def deconstructOFDM(signal, f_list, fs, symbol_length):
 
 
 def testOFDM():
-    data = np.random.randint(0,16,320) 
-    f_list = np.linspace(480, 4800, 4)
-    print f_list.size
 
-    modulated = constructOFDM(data,f_list, 48000.0, 0.01)
-    #spectrogram(modulated,48000.0*0.005)
+    n_data = 2400
+    n_freq = 12
+    T = 0.004
+
+    data = np.random.randint(0,16,n_data) 
+    
+    f_list = np.linspace(420, 4600, n_freq)
+    
+    modulated = constructOFDM(data,f_list, 48000.0, T)
+    
+    spectrogram(modulated,48000.0*T)
 
     rec_mod = streamAndRecord(modulated, 6, 48000.0)
 
-    demod = deconstructOFDM(modulated, f_list, 48000.0, 0.01)
+    demod = deconstructOFDM(modulated, f_list, 48000.0, T)
 
     #print data
     #print demod
-    print np.sum(demod == data) / 320
+    print np.sum(demod == data) / n_data
 
 if __name__ == '__main__':
     testOFDM()

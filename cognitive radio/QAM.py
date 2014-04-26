@@ -1,7 +1,11 @@
+from __future__ import division
 
 import numpy as np
 import scipy.signal as sp
 from helpers import *
+from paudio import *
+
+import matplotlib.pyplot as plt
 
 mode4coef = [ [1,0], [0,1], [-1,0], [0, -1] ]
 mode16coef = [ [1,1], [1, .333], [1,-.333], [1,-1],
@@ -53,46 +57,65 @@ def modulateQAM16(data, fc, fs, symbol_length):
 
 def demodulateQAM16(signal, fc, fs, symbol_length):
     symbol_size = fs*symbol_length
-    #num_symbols = signal.size / symbol_size
-
+    num_symbols = signal.size // symbol_size
+    n_taps = 640*2
+    
     inphase = np.zeros_like(signal)
     quadphase = np.zeros_like(signal)
 
-    h = sp.firwin(80, fc/8, nyq=fs/2)
-    h *= np.cos(2*np.pi*fc/fs*np.r_[:h.size])
-    signal = sp.fftconvolve(signal, h)
-    
-    inphase = signal * np.cos(2*np.pi*fc/fs*np.r_[:signal.size])
-    quadphase = - signal * np.sin(2*np.pi*fc/fs*np.r_[:signal.size])
+    h = sp.firwin(n_taps, fs/320, nyq=fs/2)         # perhaps try using a notch filter instead of a firwin 
+    h *= np.cos(2*np.pi*fc/fs*np.r_[:h.size])       # since the bandwidth of a QAM channel is so small.
+    #signal = sp.lfilter(h, 1.0, signal)
+    signal = sp.fftconvolve(signal, h, mode='same')
 
+    #spectrum(signal)
+    #spectrogram(signal)
+    #myplot(signal)
+
+    # calculate phase adjustment:
+    # using -2 instead of -1 beacuse something weird happens when adding to the np.r_[] below
+    delay = 0.5*(n_taps-2) 
+  
+    # demodulation to baseband
+    inphase = signal * np.cos(2*np.pi*fc/fs*(np.r_[:signal.size] + delay))
+    quadphase = - signal * np.sin(2*np.pi*fc/fs*(np.r_[:signal.size] + delay))
+        
     #lowpass after demodulating
-    h = sp.firwin(80, fc/8, nyq=fs/2)
-    inphase = sp.fftconvolve(inphase, h, mode = 'same')
-    quadphase = sp.fftconvolve(quadphase, h, mode='same')
-
-    inphase = sp.medfilt(inphase, int(symbol_size/4)-1)
+    h = sp.firwin(n_taps/8, fs/160, nyq=fs/2)
+    inphase = sp.lfilter(h, 1.0, inphase)
+    quadphase = sp.lfilter(h, 1.0, quadphase)
+    #inphase = sp.fftconvolve(inphase, h, mode = 'same')
+    #quadphase = sp.fftconvolve(quadphase, h, mode='same')
+    
     #myplot(inphase)
-    i_coef = inphase[symbol_size/2::symbol_size]
-    q_coef = quadphase[symbol_size/2::symbol_size]
+    #spectrogram(inphase)
+
+  #  inphase = sp.medfilt(inphase, int(symbol_size/4)-1)
+  #  quadphase = sp.medfilt(quadphase, int(symbol_size/4)-1)
+
+    #myplot(inphase)
+    #spectrogram(inphase)
+
+    # calc delay:
+    delay = 0.5 * (n_taps/8 -1)
+    
+    i_coef = inphase[symbol_size/2+delay::symbol_size]
+    q_coef = quadphase[symbol_size/2+delay::symbol_size]
 
     return matchCode16(i_coef, q_coef)
-    #ret = []
 
-    #for i in range(i_coef.size):
-    #    i_c = i_coef[i]
-    #    q_c = q_coef[i]
-    #    C = i_c + 1j*q_c
-    #    for i,coef in enumerate(QAM16code):
-    #        if (C == 2*coef):
-    #            ret = np.append(ret, i)
-
-    #return ret
 
 def matchCode16(i_coef, q_coef):
     
     ret = []
+    
+    # create scatter plot
+    qam_scatter(i_coef, q_coef)
 
-    #normalize maximum to hopefully 1.5
+    # # # # # # FIX ME # # # # # #
+    #print np.max(i_coef), np.max(q_coef)
+    #print np.mean(np.abs(i_coef)), np.mean(np.abs(q_coef))
+    # normalize with maximum and scale to 1.5
     i_coef = 1.5 * i_coef/np.max(i_coef)
     q_coef = 1.5 * q_coef/np.max(q_coef)
 
@@ -100,6 +123,7 @@ def matchCode16(i_coef, q_coef):
 
         I = i_coef[i]
         Q = q_coef[i]
+        
         #print "from: ", I, Q
     
         if np.abs(I) > 1:
@@ -117,6 +141,15 @@ def matchCode16(i_coef, q_coef):
                 ret = np.append(ret, j)
 
     return ret
+
+
+def qam_scatter(i, q):
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.scatter(i, q)
+    fig.show()
+
 
 def demodulateQAM(wave, mode, fc, fs, symbol_length):
 
@@ -175,20 +208,30 @@ def matchedSin(wave, fc, fs, symbol_length):
 
 
 def testQAM():
-    data = np.random.randint(0,16,160) # [ 5, 2, 7, 4, 11, 2, 0, 1, 14, 4, 8, 6, 10, 5, 2, 3, 1, 11]
-    print data
-    modulated = modulateQAM16(data, 4*480.0, 48000.0, 0.005)
-    
-    modulated += .25*np.random.normal(size=modulated.size)
-    #myplot(modulated)
-    #spectrogram(modulated)
-    
-    
-    demod = demodulateQAM16(modulated, 4*480.0, 48000.0, 0.005)
 
+    n_data = 1600
+    T = .005
+
+    data = np.random.randint(0,16,n_data) # [ 5, 2, 7, 4, 11, 2, 0, 1, 14, 4, 8, 6, 10, 5, 2, 3, 1, 11]
+    print data
+    modulated = modulateQAM16(data[::2], 3200.0, 48000.0, T)
+    mod2 = modulateQAM16(data[1::2], 1600.0, 48000.0, T)
+    modulated = .5 * (modulated + mod2)
+   
+    #modulated += .05*np.random.normal(size=modulated.size)
+    
+   # myplot(modulated)
+   # spectrogram(modulated)
+    
+    rec = streamAndRecord(modulated, 5, 48000.0)
+    
+    demod = np.zeros_like(data)
+
+    demod[::2] = demodulateQAM16(modulated, 3200.0, 48000.0, T)
+    demod[1::2] = demodulateQAM16(modulated, 1600.0, 48000.0, T)
    
     print(demod)
-    print np.sum(demod == data)/160.0
+    print np.sum(np.equal(data, demod))/n_data
 
 
 if __name__ == '__main__':

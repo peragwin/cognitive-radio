@@ -62,7 +62,7 @@ def myspectrogram_hann_ovlp(x, m, fs, fc,dbf = 60):
         f_range = [ fc, fs / 2.0 + fc]
         xmf = np.fft.fft(xmw,len(xmw),axis=0)
         sg_plot(t_range, f_range, xmf[0:m/2,:],dbf=dbf)
-        print 1
+        
     else:
         f_range = [-fs / 2.0 + fc, fs / 2.0 + fc]
         xmf = np.fft.fftshift( np.fft.fft( xmw ,len(xmw),axis=0), axes=0 )
@@ -74,5 +74,5 @@ def myspectrogram_hann_ovlp(x, m, fs, fc,dbf = 60):
 def spectrogram(x, m = None, fs = 48000, fc = 0, dbf=60):
     if not m:
         m = np.power(2,(int(np.log2(x.size)) - 5))
-        print m
+        
     myspectrogram_hann_ovlp(x,m,fs,fc,dbf)

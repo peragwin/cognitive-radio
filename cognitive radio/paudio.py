@@ -67,6 +67,22 @@ def record_audio( queue, p, fs ,dev=None,chunk=1024):
         data_flt = np.fromstring( data_str, 'float32' ) # convert string to float
         queue.put( data_flt ) # append to list
 
+def play(audio, fs, dev = None):
+
+    Qout = Queue.Queue()
+
+    p = pyaudio.PyAudio()
+
+    t_play = threading.Thread(target=play_audio, args = (Qout, p, fs, dev))
+    t_play.start()
+
+    Qout.put(audio)
+
+    
+
+    #p.terminate()
+
+
 def audioDevNumbers(p):
     # din, dout, dusb = audioDevNumbers(p)
     # The function takes a pyaudio object
@@ -172,7 +188,9 @@ def bufferedRecord(processor, time, p = None, dev_in = None):
 
     Qin = Queue.Queue()
     
+    localp = False
     if not p:
+        localp = True
         p = pyaudio.PyAudio()
 
     t_rec = threading.Thread(target = record_audio,   args = (Qin,   p, 44100, dev_in  ))
@@ -184,7 +202,8 @@ def bufferedRecord(processor, time, p = None, dev_in = None):
         if processor.process(samples):
             break
 
-    p.terminate()
+    if localp:
+        p.terminate()
 
 
 #def threadedProcess(processor, time, p=None, dev_in = None):
