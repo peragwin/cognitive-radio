@@ -175,9 +175,9 @@ if __name__ == '__main__':
 
     Q = Queue.Queue()
 
-    transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse, ss_pulse = start_stop_pulse, QO = Q)
+    transmit(data, 1200, 2400, 2, .01, pa = p,sync_pulse = sync_pulse, ss_pulse = start_stop_pulse) #, QO = Q)
 
-    decoded = realtimeDecoder(1200, 2400, 2, .01, 15, pa=p, ss_pulse=start_stop_pulse, sync_pulse = sync_pulse, QI = Q)
+    decoded = realtimeDecoder(1200, 2400, 2, .01, 15, pa=p, ss_pulse=start_stop_pulse, sync_pulse = sync_pulse) #, QI = Q)
 
     print data[:20]
     print decoded[:20]

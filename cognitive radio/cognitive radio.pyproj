@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1018d9f2-c084-4aa9-b513-e16f5690c581</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>OFDM.py</StartupFile>
+    <StartupFile>rtl.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,15 +26,18 @@
   <ItemGroup>
     <Compile Include="cognitive_radio.py" />
     <Compile Include="equalization.py" />
+    <Compile Include="fm_demodulator.py" />
     <Compile Include="helpers.py" />
     <Compile Include="membrane.py" />
     <Compile Include="FSK.py" />
     <Compile Include="OFDM.py" />
     <Compile Include="paudio.py" />
     <Compile Include="receiver.py" />
+    <Compile Include="rtl.py" />
     <Compile Include="syncronization.py" />
     <Compile Include="test_audio.py" />
     <Compile Include="QAM.py" />
+    <Compile Include="test_radio.py" />
     <Compile Include="transmitter.py" />
   </ItemGroup>
   <ItemGroup>
