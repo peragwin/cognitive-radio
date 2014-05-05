@@ -104,6 +104,32 @@ def findSync(signal, thresh = .95, sync_pulse = SYNC_PULSE):
     
     return -1
 
+def interleavePulses(signal, ss_pulse, sync_pulse, sync_width, fs, sym_len):
+
+    symbol_size = fs * sym_len
+    num_symbols = signal.size // symbol_size
+    num_syncs = 1 + num_symbols // sync_width
+
+    output = np.zeros(signal.size + sync_pulse.size*num_syncs)
+
+    i = 0
+    j = 0
+
+    while(i < num_symbols):
+
+        output[i*symbol_size + j*sync_pulse.size : i*symbol_size + (j+1)*sync_pulse.size] = sync_pulse
+        j+=1
+        output[i*symbol_size + j*sync_pulse.size : (i+sync_width)*symbol_size + j*sync_pulse.size] = signal[i*symbol_size:(i+sync_width)*symbol_size]
+        i+=sync_width
+    
+    output[output.size-ss_pulse.size:] = ss_pulse
+    output[:ss_pulse.size] = ss_pulse
+    
+    output = np.append(np.zeros(fs), output)
+    output = np.append(output, np.zeros(fs))
+
+    return output
+
 if __name__ == '__main__' :
 
     cos = np.cos(2*np.pi*10*np.r_[0:1:.001])

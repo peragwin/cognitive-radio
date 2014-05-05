@@ -99,10 +99,10 @@ def audioDevNumbers(p):
     N = p.get_device_count()
     for n in range(0,N):
             name = p.get_device_info_by_index(n).get('name')
-            
-            if name == u'Microphone (USB PnP Sound Devic':
+          
+            if name == u'Microphone (2- USB PnP Sound De':
                 dusbin = n
-            if name == u'USB Speakers (USB PnP Sound Dev':
+            if name == u'Speakers (2- USB PnP Sound Devi':
                 dusbout = n
             if name == u'Microsoft Sound Mapper - Input':
                 din = n

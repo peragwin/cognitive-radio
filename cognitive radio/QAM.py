@@ -55,7 +55,7 @@ def modulateQAM16(data, fc, fs, symbol_length):
 
     return mod_qam
 
-def demodulateQAM16(signal, fc, fs, symbol_length):
+def demodulateQAM16(signal, fc, fs, symbol_length, predelay):
     symbol_size = fs*symbol_length
     num_symbols = signal.size // symbol_size
     n_taps = 640*2
@@ -77,8 +77,8 @@ def demodulateQAM16(signal, fc, fs, symbol_length):
     delay = 0.5*(n_taps-2) 
   
     # demodulation to baseband
-    inphase = signal * np.cos(2*np.pi*fc/fs*(np.r_[:signal.size] + delay))
-    quadphase = - signal * np.sin(2*np.pi*fc/fs*(np.r_[:signal.size] + delay))
+    inphase = signal * np.cos(2*np.pi*fc/fs*(np.r_[:signal.size] + delay + predelay))
+    quadphase = - signal * np.sin(2*np.pi*fc/fs*(np.r_[:signal.size] + delay + predelay))
         
     #lowpass after demodulating
     h = sp.firwin(n_taps/8, fs/160, nyq=fs/2)

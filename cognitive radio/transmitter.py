@@ -10,7 +10,7 @@ from helpers import *
 from paudio import *
 
 
-def transmit(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pulse = None,ss_pulse = None,pa = None,  dev_out = None, QO = None):
+def transmit_fsk(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pulse = None,ss_pulse = None,pa = None,  dev_out = None, QO = None):
 
     data_size = data.size
     symbol_size = fs*symbol_length
@@ -54,3 +54,6 @@ def transmit(data, f0, f1, n, symbol_length, sync_width=100, fs=44100.0, sync_pu
     else:
         for i in np.r_[:signal.size:1024]:
             QO.put(signal[i:i+1024])
+
+def transmit(signal, fs, dev_out):
+    pass

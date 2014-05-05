@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>1018d9f2-c084-4aa9-b513-e16f5690c581</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>rtl.py</StartupFile>
+    <StartupFile>OFDM.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -37,7 +37,7 @@
     <Compile Include="syncronization.py" />
     <Compile Include="test_audio.py" />
     <Compile Include="QAM.py" />
-    <Compile Include="test_radio.py" />
+    <Compile Include="radio.py" />
     <Compile Include="transmitter.py" />
   </ItemGroup>
   <ItemGroup>

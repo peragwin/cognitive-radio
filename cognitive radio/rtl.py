@@ -29,6 +29,7 @@ def getSamplesAsync(sdr, Qin):
     sample_th = threading.Thread(target = sdr.read_samples_async, args = (samplerCallback, 25600))  # set sample block size here
     sample_th.start()
     
+#def demodStream(Qout):
 
 def testSdr():
     sdr = rtlsdr.RtlSdr()
@@ -36,7 +37,7 @@ def testSdr():
     radioQ = Queue.Queue()
     Qout = Queue.Queue()
 
-    initRtlSdr(sdr, 94.9e6, 2.4e5, 22)
+    initRtlSdr(sdr, 105.3e6, 2.4e5, 22)
     getSamplesAsync(sdr, radioQ)
     
     p = pyaudio.PyAudio()
